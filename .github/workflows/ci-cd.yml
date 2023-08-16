@@ -1,0 +1,96 @@
+name: ci-cd-api-admin
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  ORGANIZATION_NAME: k8s12-CacaoEnt
+  ROOT_REPOSITORY: profilehub
+  ADMIN_REPOSITORY: profile-box-api-admin
+  COMM_REPOSITORY: profile-box-comm
+  GITOPS_REPOSITORY: profile-box-gitops
+  GITOPS_DIR: gitops/api-admin/prod
+  GITOPS_YAML_FILE: deployment.yaml
+  AWS_REGION: ap-northeast-2
+  AWS_ECR_REGISTRY: 204770130849.dkr.ecr.ap-northeast-2.amazonaws.com
+  AWS_ECR_REPOSITORY: profile-box-api-admin
+  IMG_TAG: ${{ github.sha }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    
+    - name: Checkout Root Code
+      uses: actions/checkout@v3
+      with:
+        repository: ${{ env.ORGANIZATION_NAME }}/${{ env.ROOT_REPOSITORY }}
+        ref: main
+
+    - name: Checkout Sub Code
+      uses: actions/checkout@v3
+      with:
+        repository: ${{ env.ORGANIZATION_NAME }}/${{ env.ADMIN_REPOSITORY }}
+        ref: main
+        path: ${{ env.ADMIN_REPOSITORY }}
+        
+    - name: Checkout Comm Code
+      uses: actions/checkout@v3
+      with:
+        repository: ${{ env.ORGANIZATION_NAME }}/${{ env.COMM_REPOSITORY }}
+        ref: main
+        path: ${{ env.COMM_REPOSITORY }}
+    
+    - name: Checkout GitOps Code
+      uses: actions/checkout@v3
+      with:
+        repository: ${{ env.ORGANIZATION_NAME }}/${{ env.GITOPS_REPOSITORY }}
+        ref: main
+        path: ${{ env.GITOPS_REPOSITORY }}
+        token: ${{secrets.GIT_TOKEN}}
+      
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
+        settings-path: ${{ github.workspace }} # location for the settings.xml file
+
+    - name: Build with Gradle
+      uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25 # v2.6.0
+      with:
+        arguments: build
+    
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+        
+    - name: Build, tag, and push image to Amazon ECR
+      run: |
+        cd ${{ env.ADMIN_REPOSITORY }}
+        docker build --no-cache -t ${{ env.AWS_ECR_REGISTRY }}/${{ env.AWS_ECR_REPOSITORY }}:${{env.IMG_TAG}} .
+        docker push ${{ env.AWS_ECR_REGISTRY }}/${{ env.AWS_ECR_REPOSITORY }}:${{env.IMG_TAG}}
+  
+    - name: Update GitOps YAML Version and Commit
+      run: |
+          cd ${{ env.GITOPS_REPOSITORY }}/${{ env.GITOPS_DIR }}
+          sed -i 's/${{ env.AWS_ECR_REPOSITORY }}:.*/${{ env.AWS_ECR_REPOSITORY }}:${{ env.IMG_TAG }}/' ${{env.GITOPS_YAML_FILE}}
+          cd ../../../
+          git config user.name ${{ secrets.USER_NAME }}
+          git config user.email ${{ secrets.USER_EMAIL }}
+          git add ${{ env.GITOPS_DIR }}/${{ env.GITOPS_YAML_FILE }}
+          git commit -m "[ci-cd-api-admin] Update YAML Image Tag To ${{ env.IMG_TAG }}"
+          git push origin main
