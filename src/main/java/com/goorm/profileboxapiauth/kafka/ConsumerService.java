@@ -1,4 +1,4 @@
-package com.goorm.profileboxapiadmin.kafka;
+package com.goorm.profileboxapiauth.kafka;
 
 import org.springframework.stereotype.Component;
 

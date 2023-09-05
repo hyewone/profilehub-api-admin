@@ -1,10 +1,10 @@
-package com.goorm.profileboxapiadmin.project.todoList;
+package com.goorm.profileboxapiauth.project.todoList;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ProfileBoxApiAdminApplicationTests {
+class ProfileBoxApiAuthApplicationTests {
 
 	@Test
 	void contextLoads() {

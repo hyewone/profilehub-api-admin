@@ -1,4 +1,4 @@
-package com.goorm.profileboxapiadmin.service;
+package com.goorm.profileboxapiauth.service;
 
 import com.goorm.profileboxcomm.dto.member.MemberDTO;
 import com.goorm.profileboxcomm.dto.member.request.CreateMemberRequestDTO;
@@ -32,16 +32,15 @@ public class MemberService {
         return memberRepository.existsByMemberEmail(memberEmail);
     }
 
-    @Transactional
-    public MemberDTO saveMember(CreateMemberRequestDTO dto) {
-        if(isAlready(dto.getMemberEmail())) throw new ApiException(ExceptionEnum.MEMBER_ALREADY_EXIST);
-        //dto.setMemberPassword(passwordEncoder.encode(dto.getMemberPassword()));
-        Member entity = CreateMemberRequestDTO.toEntity(dto);
-        System.out.println("*********회원가입할 " + entity);
-        entity.setMemberPassword(passwordEncoder.encode(entity.getMemberPassword()));
-        MemberDTO memberDTO = Member.toDTO(memberRepository.save(entity));
-        return memberDTO;
-    }
+//    @Transactional
+//    public MemberDTO saveMember(CreateMemberRequestDTO dto) {
+//        if(isAlready(dto.getMemberEmail())) throw new ApiException(ExceptionEnum.MEMBER_ALREADY_EXIST);
+//        //dto.setMemberPassword(passwordEncoder.encode(dto.getMemberPassword()));
+//        Member entity = CreateMemberRequestDTO.toEntity(dto);
+//        entity.setMemberPassword(passwordEncoder.encode(entity.getMemberPassword()));
+//        MemberDTO memberDTO = Member.toDTO(memberRepository.save(entity));
+//        return memberDTO;
+//    }
 
     @Transactional
     public Member findLoginMemberByEmail(String email) {

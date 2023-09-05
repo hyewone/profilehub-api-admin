@@ -1,4 +1,4 @@
-package com.goorm.profileboxapiadmin;
+package com.goorm.profileboxapiauth;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -8,9 +8,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @ComponentScan("com.goorm")
 @SpringBootApplication
-public class ProfileBoxApiAdminApplication {
+public class ProfileBoxApiAuthApplication {
 	public static void main(String[] args) {
-		SpringApplication.run(ProfileBoxApiAdminApplication.class, args);
+		SpringApplication.run(ProfileBoxApiAuthApplication.class, args);
 	}
 
 }

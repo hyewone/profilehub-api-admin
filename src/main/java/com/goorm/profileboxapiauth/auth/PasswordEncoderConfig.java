@@ -1,4 +1,4 @@
-package com.goorm.profileboxapiadmin.auth;
+package com.goorm.profileboxapiauth.auth;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
