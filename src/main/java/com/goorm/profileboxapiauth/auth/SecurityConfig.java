@@ -2,7 +2,7 @@ package com.goorm.profileboxapiauth.auth;
 
 
 import com.goorm.profileboxapiauth.service.AuthService;
-import com.goorm.profileboxapiauth.service.MemberService;
+import com.goorm.profileboxcomm.auth.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

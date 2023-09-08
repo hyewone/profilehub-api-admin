@@ -1,6 +1,6 @@
 package com.goorm.profileboxapiauth.project.todoList;
 
-import com.goorm.profileboxapiauth.auth.JwtProvider;
+import com.goorm.profileboxcomm.auth.JwtProvider;
 import com.goorm.profileboxapiauth.service.AuthService;
 import com.goorm.profileboxcomm.entity.Member;
 import com.goorm.profileboxcomm.enumeration.ProviderType;

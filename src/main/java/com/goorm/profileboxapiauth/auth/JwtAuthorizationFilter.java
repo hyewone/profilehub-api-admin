@@ -3,7 +3,8 @@ package com.goorm.profileboxapiauth.auth;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.goorm.profileboxapiauth.service.AuthService;
-import com.goorm.profileboxapiauth.service.MemberService;
+import com.goorm.profileboxcomm.auth.JwtProperties;
+import com.goorm.profileboxcomm.auth.JwtProvider;
 import com.goorm.profileboxcomm.entity.Member;
 import com.goorm.profileboxcomm.enumeration.ProviderType;
 import com.goorm.profileboxcomm.exception.ApiException;
@@ -15,10 +16,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     private AuthService authService;
@@ -48,10 +54,15 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         if(email != null){
             Member member = authService.getMemberByMemberEmailAndProviderType(email, ProviderType.valueOf(provider))
                     .orElseThrow(() -> new ApiException(ExceptionEnum.MEMBER_NOT_FOUND));
-            Authentication authentication = new UsernamePasswordAuthenticationToken(member, member.getMemberEmail(), member.getAuthorities());
+
+            Collection<GrantedAuthority> authorities = new ArrayList<>();
+            authorities.add(new SimpleGrantedAuthority(member.getMemberType().toString()));
+//        getRoleList().forEach((r) -> {
+//            authorities.add(()->{return r;});
+//        });
+            Authentication authentication = new UsernamePasswordAuthenticationToken(member, member.getMemberEmail(), authorities);
             SecurityContextHolder.getContext().setAuthentication(authentication);
             chain.doFilter(request, response);
         }
-
     }
 }
