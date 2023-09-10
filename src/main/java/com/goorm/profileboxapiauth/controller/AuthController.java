@@ -1,17 +1,20 @@
 package com.goorm.profileboxapiauth.controller;
 
-import com.goorm.profileboxcomm.auth.JwtProvider;
 import com.goorm.profileboxapiauth.service.AuthService;
+import com.goorm.profileboxcomm.auth.JwtProvider;
 import com.goorm.profileboxcomm.dto.member.response.SelectLoginMemberResponseDto;
 import com.goorm.profileboxcomm.entity.Member;
 import com.goorm.profileboxcomm.enumeration.ProviderType;
 import com.goorm.profileboxcomm.response.ApiResult;
 import com.goorm.profileboxcomm.response.ApiResultType;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+
+@Tag(name = "Auth")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/auth")
@@ -19,6 +22,7 @@ public class AuthController {
     private final AuthService authService;
     private final JwtProvider jwtProvider;
 
+    @Operation(summary = "로그인")
     @PostMapping("/login")
     public ApiResult<Member> login(@RequestParam String memberEmail,
                                    @RequestParam String memberType,
@@ -34,6 +38,7 @@ public class AuthController {
         return ApiResult.getResult(ApiResultType.SUCCESS, "로그인", result);
     }
 
+    @Operation(summary = "인증 요청")
     @GetMapping("/verify")
     public Member checkAuth(Authentication authentication){
         return (Member) authentication.getPrincipal();
