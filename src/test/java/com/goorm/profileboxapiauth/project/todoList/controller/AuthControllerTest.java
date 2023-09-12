@@ -1,4 +1,4 @@
-package com.goorm.profileboxapiauth.controller;
+package com.goorm.profileboxapiauth.project.todoList.controller;
 
 import com.goorm.profileboxcomm.auth.JwtProvider;
 import com.goorm.profileboxapiauth.service.AuthService;
@@ -6,6 +6,7 @@ import com.goorm.profileboxcomm.entity.Member;
 import com.goorm.profileboxcomm.enumeration.MemberType;
 import com.goorm.profileboxcomm.enumeration.ProviderType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +42,8 @@ public class AuthControllerTest {
 
 
     @Test
-    public void testLogin() throws Exception {
-        // Mock 데이터 설정
+    public void testLoginBasic() throws Exception {
+        // given
         Member mockMember = new Member();
         mockMember.setMemberId(Long.valueOf(1));
         mockMember.setMemberEmail("test@example.com");
@@ -51,13 +52,15 @@ public class AuthControllerTest {
 
         String mockJwtToken = "mocked-jwt-token";
 
+
+        // when
         when(authService.getMemberByMemberEmailAndProviderType(anyString(), any()))
                 .thenReturn(Optional.of(mockMember));
 
         when(jwtProvider.createJwtAccessToken(any(Member.class)))
                 .thenReturn(mockJwtToken);
 
-        // 테스트 요청
+        // then
         mockMvc.perform(post("/v1/auth/login")
                         .param("memberEmail", "test@example.com")
                         .param("memberType", "ACTOR")
@@ -71,17 +74,31 @@ public class AuthControllerTest {
                 .andExpect(jsonPath("$.data.memberInfo.memberType").value("ACTOR"))
                 .andExpect(jsonPath("$.data.memberInfo.providerType").value("GOOGLE"))
                 .andExpect(jsonPath("$.data.jwtToken").value(mockJwtToken));
+    }
+
+    @Test
+    public void testLoginSignup() throws Exception {
+        // given
+        String mockJwtToken = "mocked-jwt-token";
+
+        // when
+        when(authService.getMemberByMemberEmailAndProviderType(anyString(), any()))
+                .thenReturn(Optional.empty());
 
         when(authService.addMember(any(Member.class)))
                 .thenAnswer(invocation -> {
-                    Member mockMember2 = new Member();
-                    mockMember2.setMemberId(Long.valueOf(2));
-                    mockMember2.setMemberEmail("test2@example.com");
-                    mockMember2.setMemberType(MemberType.ACTOR);
-                    mockMember2.setProviderType(ProviderType.GOOGLE);
-                    return mockMember2;
+                    Member newMember = new Member();
+                    newMember.setMemberId(Long.valueOf(2));
+                    newMember.setMemberEmail("test2@example.com");
+                    newMember.setMemberType(MemberType.ACTOR);
+                    newMember.setProviderType(ProviderType.GOOGLE);
+                    return newMember;
                 });
 
+        when(jwtProvider.createJwtAccessToken(any(Member.class)))
+                .thenReturn(mockJwtToken);
+
+        // then
         mockMvc.perform(post("/v1/auth/login")
                         .param("memberEmail", "test2@example.com")
                         .param("memberType", "ACTOR")
@@ -98,11 +115,49 @@ public class AuthControllerTest {
     }
 
     @Test
+    public void testLoginBadRequestInvalidEmail() throws Exception {
+        mockMvc.perform(post("/v1/auth/login")
+                        .param("memberEmail", "test2")
+                        .param("memberType", "ACTOR")
+                        .param("providerType", "GOOGLE"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value("ERROR"))
+                .andExpect(jsonPath("$.statusCode").value(500));
+    }
+
+    @Test
+    public void testLoginBadRequestInvalidMemberType() throws Exception {
+        mockMvc.perform(post("/v1/auth/login")
+                        .param("memberEmail", "test2@gmail.com")
+                        .param("memberType", "ACTORR")
+                        .param("providerType", "GOOGLE"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value("ERROR"))
+                .andExpect(jsonPath("$.statusCode").value(500));
+    }
+
+    @Test
+    public void testLoginBadRequestInvalidProviderType() throws Exception {
+        mockMvc.perform(post("/v1/auth/login")
+                        .param("memberEmail", "test2@gmail.com")
+                        .param("memberType", "ACTOR")
+                        .param("providerType", "GOOGLEE"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value("ERROR"))
+                .andExpect(jsonPath("$.statusCode").value(500));
+    }
+
+    @Test
+    @Disabled
     public void testLogout() throws Exception {
 
     }
 
     @Test
+    @Disabled
     public void testSignup() throws Exception {
 
     }
