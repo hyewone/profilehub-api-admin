@@ -3,7 +3,6 @@ package com.goorm.profileboxapiauth.service;
 import com.goorm.profileboxcomm.entity.Member;
 import com.goorm.profileboxcomm.enumeration.ProviderType;
 import com.goorm.profileboxcomm.repository.AuthRepository;
-import com.goorm.profileboxcomm.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +14,6 @@ import java.util.Optional;
 public class AuthService {
 
     private final AuthRepository authRepository;
-//    private final MemberRepository memberRepository;
 
     @Transactional
     public Optional<Member> getMemberByMemberEmailAndProviderType(String memberEmail, ProviderType providerType){

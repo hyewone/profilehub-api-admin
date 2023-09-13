@@ -3,19 +3,6 @@ spring:
     include:
       - comm
 ---
-api:
-  common:
-    version: 1.0.0
-    title: Profile Box User API
-    description: Profile Box User API
-    termsOfServiceUrl: ㅇ
-    license: License
-    licenseUrl: MY LICENSE URL
-    contact:
-      name: Contact
-      url: My
-      email: me@mail.com
-
 spring:
   servlet:
     multipart:
