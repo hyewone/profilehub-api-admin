@@ -55,3 +55,15 @@ logging:
       on-profile: local
   level:
     root: DEBUG
+
+#    spring:
+#      security:
+#        oauth2:
+#          client:
+#            registration:
+#              github:
+#                clientId: github-client-id
+#                clientSecret: github-client-secret
+#              google:
+#                client-id: google-client-id
+#                client-secret: google-client-secret
