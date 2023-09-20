@@ -5,6 +5,7 @@ import com.goorm.profileboxcomm.auth.JwtProvider;
 import com.goorm.profileboxcomm.dto.auth.requset.LoginRequestDto;
 import com.goorm.profileboxcomm.dto.member.response.SelectLoginMemberResponseDto;
 import com.goorm.profileboxcomm.entity.Member;
+import com.goorm.profileboxcomm.repository.ProfileRepository;
 import com.goorm.profileboxcomm.response.ApiResult;
 import com.goorm.profileboxcomm.response.ApiResultType;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/v1/auth")
 public class AuthController {
     private final AuthService authService;
+    private final ProfileRepository profileRepository;
     private final JwtProvider jwtProvider;
 
     @Operation(summary = "로그인")
@@ -30,6 +32,9 @@ public class AuthController {
                 .orElseGet(() -> {
                     return authService.addMember(Member.createMember(dto.getMemberType(), dto.getProviderType(), dto.getMemberEmail()));
                 });
+
+        profileRepository.findProfileByMember(member)
+                .ifPresent(profile -> member.setProfile(profile));
 
         String newJwtToken = jwtProvider.createJwtAccessToken(member);
         SelectLoginMemberResponseDto result = new SelectLoginMemberResponseDto(member, newJwtToken);
